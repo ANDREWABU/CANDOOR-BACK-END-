@@ -1,0 +1,39 @@
+<IfModule mod_rewrite.c>
+# That was ONLY to protect you from 500 errors
+# if your server did not have mod_rewrite enabled
+
+RewriteEngine On
+# RewriteBase /
+# NOT needed unless you're using mod_alias to redirect
+
+# Direct all hello.candoor.io to wordpress
+# !Make sure app authentication (handled in laravel home dir), API calls, images, css, and js
+RewriteCond %{HTTP_HOST} ^hello\.candoor\.io$ [NC]
+RewriteRule ^(.*)$ /public/wordpress/$1 [L]
+
+#Rewrite unauthenticated candoor.io[with no following path] to wordpress
+RewriteCond %{SERVER_PORT} !^3000$
+RewriteCond %{REQUEST_URI} ^/
+RewriteRule ^(.*)$ /public/wordpress/ [L]
+
+# Direct all other requests to /public folder
+RewriteCond %{REQUEST_URI} !/public
+RewriteRule ^(.*)$ public/$1 [L]
+
+
+
+# BEGIN WordPress
+# The directives (lines) between "BEGIN WordPress" and "END WordPress" are
+# dynamically generated, and should only be modified via WordPress filters.
+# Any changes to the directives between these markers will be overwritten.
+<IfModule mod_rewrite.c>
+RewriteEngine On
+RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+RewriteBase /
+RewriteRule ^index\.php$ - [L]
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule . /index.php [L]
+</IfModule>
+
+# END WordPress

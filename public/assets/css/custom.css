@@ -1,0 +1,42 @@
+/* Career Spaces Page */
+.space-between{
+    display: flex;
+    flex-flow: row;
+    justify-content: space-between;
+}
+.td-icon{
+    width: 70px;
+    height: 70px;
+}
+.red{
+    color: red;
+}
+.image-show{
+    width: 50%;
+    margin: 5px 0px;
+}
+
+.active-btn{
+    padding: 5px 10px;
+    cursor: pointer;
+}
+.active-btn:hover{
+    color: #fff;
+}
+
+.btn-close{
+    border-radius: 19px;
+    font-size: 12px;
+    padding: 10px !important;
+    background-color: #2020207a;
+}
+.modal-header{
+    background-color: #efefef;
+    /* #eaeaea */
+}
+.progress{
+    display: none !important;
+}
+.modal-footer {
+    background: #efefef;
+}
