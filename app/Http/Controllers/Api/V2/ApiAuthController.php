@@ -2909,25 +2909,22 @@ class ApiAuthController extends Controller
                         $advisorTimeZone = DB::table('user_backgrounds')->where('UserID', $advisorUserID->UserID)->select('time_zone')->first();
                         $advisorTimeZoneKey = DB::table('time_zones')->where('name', $advisorTimeZone->time_zone)->select('key')->first();
 
-                        $time_interval_start = Carbon::createFromFormat('Y-m-d H:i:s', $value->starttime, $advisorTimeZoneKey->key);
-                        $time_interval_end = Carbon::createFromFormat('Y-m-d H:i:s', $value->endtime, $advisorTimeZoneKey->key);
+                        $time_interval_start = Carbon::createFromFormat('Y-m-d H:i:s', $value->starttime, 'UTC')->setTimezone($advisorTimeZoneKey->key);
+                        $time_interval_end   = Carbon::createFromFormat('Y-m-d H:i:s', $value->endtime,   'UTC')->setTimezone($advisorTimeZoneKey->key);
 
                         $parsed_confirmed_meeting_date = $time_interval_start->format('l, M jS');
-                        $parsed_confirmed_meeting_starttime = ltrim($time_interval_start->format('h:iA'),0);
-                        $parsed_confirmed_meeting_endtime = ltrim($time_interval_end->format('h:iA'),0);
-
-//		                    $confirmed_meeting_starttime_unix = strtotime($confirmed_eting_starttime_unix);
+                        $parsed_confirmed_meeting_starttime = ltrim($time_interval_start->format('h:iA'), 0);
+                        $parsed_confirmed_meeting_endtime   = ltrim($time_interval_end->format('h:iA'), 0);
                     }
                     if($value->endtime){ // Advisor
-                    		$parsed_meeting_date = $time_interval_end->format('l, M jS');
-                    	
-		                    $confirmed_meeting_endtime_unix = strtotime($value->endtime);
-		                    $confirmed_meeting_secondspast = strtotime(now()) - $confirmed_meeting_endtime_unix;
-		                    if($confirmed_meeting_secondspast < 0) {$confirmed_meeting_ispast = "TRUE";}
-	                    	if(strtotime($value->endtime) < strtotime(now())) { // meeting is in the past
-		                  		$value->meeting_status = 'Completed';
-		                  	}
-                    	
+                        $parsed_meeting_date = $time_interval_end->format('l, M jS');
+
+                        $confirmed_meeting_endtime_unix   = Carbon::createFromFormat('Y-m-d H:i:s', $value->endtime, 'UTC')->timestamp;
+                        $confirmed_meeting_secondspast    = Carbon::now('UTC')->timestamp - $confirmed_meeting_endtime_unix;
+                        if($confirmed_meeting_secondspast < 0) { $confirmed_meeting_ispast = "TRUE"; }
+                        if($confirmed_meeting_endtime_unix < Carbon::now('UTC')->timestamp) {
+                            $value->meeting_status = 'Completed';
+                        }
                     }
 
 
@@ -3091,24 +3088,23 @@ class ApiAuthController extends Controller
                         $adviseeTimeZone = DB::table('user_backgrounds')->where('UserID', $adviseeUserID->UserID)->select('time_zone')->first();
                         $adviseeTimeZoneKey = DB::table('time_zones')->where('name', $adviseeTimeZone->time_zone)->select('key')->first();
 
-                        $time_interval_start = Carbon::createFromFormat('Y-m-d H:i:s', $value->starttime, $adviseeTimeZoneKey->key);
-                        $time_interval_end = Carbon::createFromFormat('Y-m-d H:i:s', $value->endtime, $adviseeTimeZoneKey->key);
+                        $time_interval_start = Carbon::createFromFormat('Y-m-d H:i:s', $value->starttime, 'UTC')->setTimezone($adviseeTimeZoneKey->key);
+                        $time_interval_end   = Carbon::createFromFormat('Y-m-d H:i:s', $value->endtime,   'UTC')->setTimezone($adviseeTimeZoneKey->key);
 
                         $parsed_confirmed_meeting_date = $time_interval_start->format('l, M jS');
                         $parsed_confirmed_meeting_starttime = ltrim($time_interval_start->format('h:iA'),0);
                         $parsed_confirmed_meeting_endtime = ltrim($time_interval_end->format('h:iA'),0);
-
-//		                    $confirmed_meeting_starttime_unix = strtotime($confirmed_meeting_starttime_unix);
                     }
                     if($value->endtime){ // Advisee
-                    		$parsed_meeting_date = $time_interval_end->format('l, M jS');
-		                    $confirmed_meeting_endtime_unix = strtotime($parsed_confirmed_meeting_endtime);
-		                    // returns 0 if in future; # of seconds if past
-		                    $confirmed_meeting_secondspast = strtotime(now()) - $confirmed_meeting_endtime_unix;
-		                    if($confirmed_meeting_secondspast > 0) {
-		                    	$confirmed_meeting_ispast = "TRUE";
-		                    }
-                    	
+                            $parsed_meeting_date = $time_interval_end->format('l, M jS');
+                            $confirmed_meeting_endtime_unix = Carbon::createFromFormat('Y-m-d H:i:s', $value->endtime, 'UTC')->timestamp;
+                            $confirmed_meeting_secondspast = Carbon::now('UTC')->timestamp - $confirmed_meeting_endtime_unix;
+                            if($confirmed_meeting_secondspast > 0) {
+                                $confirmed_meeting_ispast = "TRUE";
+                            }
+                            if($confirmed_meeting_endtime_unix < Carbon::now('UTC')->timestamp) {
+                                $value->meeting_status = 'Completed';
+                            }
                     }
 
                     if($value->meeting_status == 'Request Sent'){
